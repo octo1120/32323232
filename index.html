@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026학년도 학생·학부모 상담 신청</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-slate: #f8fafc;
+      --text-main: #1e293b;
+      --border-color: #e2e8f0;
+      --disabled-bg: #f1f5f9;
+      --disabled-text: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg-slate); color: var(--text-main); line-height: 1.5; padding: 20px 12px; }
+    .container { max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 28px 20px; }
+    header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--border-color); }
+    header h1 { font-size: 1.5rem; color: var(--primary); font-weight: 700; }
+    header p { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+
+    .form-group { margin-bottom: 24px; }
+    .form-group label.title { font-weight: 600; font-size: 1rem; display: block; margin-bottom: 8px; color: #0f172a; }
+    .radio-group { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+    .radio-btn { border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+    .radio-btn input { display: none; }
+    .radio-btn.active { border-color: var(--primary); background-color: #eeeffe; color: var(--primary); font-weight: 700; }
+
+    input[type="text"], input[type="tel"], textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; outline: none; }
+    input[type="text"]:focus, input[type="tel"]:focus, textarea:focus { border-color: var(--primary); }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 8px; }
+    .cal-header { font-size: 0.8rem; font-weight: 600; color: #64748b; padding: 6px 0; }
+    .cal-day { padding: 10px 4px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; cursor: pointer; background: #fff; }
+    .cal-day.disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; border-color: #e2e8f0; }
+    .cal-day.selected { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+
+    .time-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+    .time-slot { border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; text-align: center; font-size: 0.9rem; cursor: pointer; background: #fff; }
+    .time-slot.selected { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: bold; }
+    .time-slot.closed { background: #fee2e2; color: #ef4444; border-color: #fca5a5; cursor: not-allowed; text-decoration: line-through; }
+
+    .submit-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 12px; }
+    .submit-btn:hover { background: var(--primary-hover); }
+
+    .desc-text { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+    footer { text-align: center; margin-top: 24px; font-size: 0.8rem; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏫 2026학년도 학생·학부모 상담 신청</h1>
+      <p>희망하는 상담 일자와 시간을 선택하여 제출해 주세요.</p>
+    </header>
+
+    <form id="consultationForm" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label class="title">1. 신청자 구분 *</label>
+        <div class="radio-group">
+          <label class="radio-btn active" id="type-student">
+            <input type="radio" name="applicantType" value="학생" checked onclick="selectApplicantType('학생')"> 학생
+          </label>
+          <label class="radio-btn" id="type-parent">
+            <input type="radio" name="applicantType" value="학부모" onclick="selectApplicantType('학부모')"> 학부모
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="title" id="nameLabel">2. 신청자 성함 / 학번 *</label>
+        <input type="text" id="applicantName" placeholder="예: 3학년 1반 15번 홍길동" required>
+      </div>
+
+      <div class="form-group">
+        <label class="title">3. 연락처 *</label>
+        <input type="tel" id="applicantContact" placeholder="010-0000-0000" required>
+      </div>
+
+      <div class="form-group">
+        <label class="title">4. 상담 방식 *</label>
+        <div class="radio-group">
+          <label class="radio-btn active" id="method-face">
+            <input type="radio" name="consultMethod" value="대면" checked onclick="selectMethod('대면')"> 대면 상담
+          </label>
+          <label class="radio-btn" id="method-phone">
+            <input type="radio" name="consultMethod" value="비대면" onclick="selectMethod('비대면')"> 비대면 (전화)
+          </label>
+        </div>
+        <p class="desc-text" id="methodDesc">학교에서 선생님과 대면 상담을 진행합니다.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="title">5. 희망 날짜 선택 (11/9 ~ 11/27 평일) *</label>
+        <p class="desc-text">※ 주말 및 11/19, 11/20일은 상담이 진행되지 않습니다.</p>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="title">6. 희망 시간 선택 *</label>
+        <div class="time-grid" id="timeGrid">
+          <p class="desc-text" style="grid-column: span 2;">날짜를 먼저 선택해 주세요.</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="title">7. 사전 상담 희망 내용 (선택)</label>
+        <textarea id="consultNotes" rows="3" placeholder="선생님께 미리 전달하고 싶은 내용을 자유롭게 작성해 주세요."></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">상담 신청 완료하기</button>
+    </form>
+
+    <footer>
+      <p>© 2026 School Consultation System</p>
+    </footer>
+  </div>
+
+  <script>
+    let state = {
+      applicantType: '학생',
+      method: '대면',
+      selectedDate: '',
+      selectedTime: '',
+      scriptUrl: 'https://script.google.com/macros/s/AKfycbzQGicxujn6nQObs1mCk5_49Gvmb-6lnmMT8UGqZMBvsDHtF6-JvphX4rcnj3UigIa7Ug/exec'
+    };
+
+    const disabledDates = ['2026-11-19', '2026-11-20'];
+    const nightSlots = ['18:00', '19:00', '20:00'];
+    let existingReservations = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await fetchReservations();
+      renderCalendar();
+    });
+
+    async function fetchReservations() {
+      if(!state.scriptUrl) return;
+      try {
+        const res = await fetch(state.scriptUrl);
+        const data = await res.json();
+        if(Array.isArray(data)) {
+          existingReservations = data;
+          if(state.selectedDate) renderTimeSlots();
+        }
+      } catch(err) {
+        console.error('예약 내역 동기화 실패:', err);
+      }
+    }
+
+    function selectApplicantType(type) {
+      state.applicantType = type;
+      document.getElementById('type-student').classList.toggle('active', type === '학생');
+      document.getElementById('type-parent').classList.toggle('active', type === '학부모');
+      document.getElementById('nameLabel').innerText = type === '학생' ? '2. 신청자 성함 / 학번 *' : '2. 학부모 성함 및 학생 이름/학번 *';
+      state.selectedTime = '';
+      if(state.selectedDate) renderTimeSlots();
+    }
+
+    function selectMethod(method) {
+      state.method = method;
+      document.getElementById('method-face').classList.toggle('active', method === '대면');
+      document.getElementById('method-phone').classList.toggle('active', method === '비대면');
+      document.getElementById('methodDesc').innerText = method === '대면' ? '학교에서 선생님과 대면 상담을 진행합니다.' : '선생님과 전화로 상담을 진행합니다.';
+      state.selectedTime = '';
+      if(state.selectedDate) renderTimeSlots();
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      const daysHeader = ['일', '월', '화', '수', '목', '금', '토'];
+      daysHeader.forEach(d => grid.innerHTML += `<div class="cal-header">${d}</div>`);
+
+      for(let i = 1; i <= 30; i++) {
+        const dayStr = i < 10 ? '0' + i : i;
+        const fullDate = `2026-11-${dayStr}`;
+        const dateObj = new Date(2026, 10, i);
+        const dayOfWeek = dateObj.getDay();
+
+        let isTargetRange = (i >= 9 && i <= 27);
+        let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+        let isDisabledExplicit = disabledDates.includes(fullDate);
+        let isDisabled = !isTargetRange || isWeekend || isDisabledExplicit;
+
+        const dayEl = document.createElement('div');
+        dayEl.className = `cal-day ${isDisabled ? 'disabled' : ''} ${state.selectedDate === fullDate ? 'selected' : ''}`;
+        dayEl.innerText = i;
+
+        if(!isDisabled) {
+          dayEl.onclick = async () => {
+            state.selectedDate = fullDate;
+            state.selectedTime = '';
+            renderCalendar();
+            await fetchReservations();
+            renderTimeSlots();
+          };
+        }
+        grid.appendChild(dayEl);
+      }
+    }
+
+    function renderTimeSlots() {
+      const grid = document.getElementById('timeGrid');
+      grid.innerHTML = '';
+      if(!state.selectedDate) return;
+
+      const dateObj = new Date(state.selectedDate);
+      const dayOfWeek = dateObj.getDay();
+      let slots = [];
+
+      if(state.applicantType === '학생') {
+        if(state.method === '대면') {
+          slots = ['조회시간', '1교시 후', '2교시 후', '3교시 후', '점심시간', '5교시 후', '6교시 후', '방과후'];
+        } else {
+          slots = ['18:00', '19:00', '20:00', '22:00'];
+        }
+      } else {
+        const parentDayMap = {
+          1: ['10:35', '14:05', '15:10'],
+          2: ['09:40', '13:10', '15:50'],
+          3: ['09:40', '15:50'],
+          4: ['14:05', '15:50'],
+          5: ['10:35']
+        };
+        slots = [...(parentDayMap[dayOfWeek] || [])];
+        if(state.method === '비대면') {
+          slots.push('18:00', '19:00', '20:00');
+        }
+      }
+
+      slots.forEach(slot => {
+        const slotEl = document.createElement('div');
+        let isClosed = false;
+
+        if(nightSlots.includes(slot)) {
+          const exists = existingReservations.some(r => r.date === state.selectedDate && r.time === slot && r.status !== '취소됨');
+          if(exists) isClosed = true;
+        }
+
+        slotEl.className = `time-slot ${isClosed ? 'closed' : ''} ${state.selectedTime === slot ? 'selected' : ''}`;
+        slotEl.innerText = isClosed ? `${slot} (마감)` : slot;
+
+        if(!isClosed) {
+          slotEl.onclick = () => {
+            state.selectedTime = slot;
+            renderTimeSlots();
+          };
+        }
+        grid.appendChild(slotEl);
+      });
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      if(!state.selectedDate) return alert('희망 날짜를 선택해 주세요.');
+      if(!state.selectedTime) return alert('희망 시간을 선택해 주세요.');
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = '신청 접수 중...';
+
+      const payload = {
+        timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+        applicantType: state.applicantType,
+        name: document.getElementById('applicantName').value,
+        details: document.getElementById('applicantContact').value,
+        method: state.method,
+        date: state.selectedDate,
+        time: state.selectedTime,
+        notes: document.getElementById('consultNotes').value,
+        status: '대기중'
+      };
+
+      try {
+        await fetch(state.scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        alert(`상담 신청이 완료되었습니다!\n- 날짜: ${payload.date}\n- 시간: ${payload.time}`);
+        location.reload();
+      } catch(err) {
+        alert('신청 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        submitBtn.disabled = false;
+        submitBtn.innerText = '상담 신청 완료하기';
+      }
+    }
+  </script>
+</body>
+</html>
